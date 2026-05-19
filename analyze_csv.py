@@ -3,7 +3,8 @@ import os
 import re
 import pandas as pd
 
-DATE_PATTERN = re.compile(r'^(0?[1-9]|1[0-2])/(0?[1-9]|[12]\d|3[01])/\d{4}$')
+DATE_PATTERN     = re.compile(r'^(0?[1-9]|1[0-2])/(0?[1-9]|[12]\d|3[01])/\d{4}$')
+DATETIME_PATTERN = re.compile(r'^(0?[1-9]|1[0-2])/(0?[1-9]|[12]\d|3[01])/\d{4} ([01]?\d|2[0-3]):[0-5]\d(:[0-5]\d)?$')
 INT_PATTERN = re.compile(r'^-?\d+$')
 FLOAT_PATTERN = re.compile(r'^-?\d+\.\d+$')
 
@@ -55,6 +56,9 @@ def resolve_type(series):
 
     if non_null.empty:
         return 'VARCHAR(50)', None
+
+    if non_null.apply(lambda v: bool(DATETIME_PATTERN.match(str(v).strip()))).all():
+        return 'DATETIME', None
 
     if non_null.apply(lambda v: bool(DATE_PATTERN.match(str(v).strip()))).all():
         return 'DATE', None
